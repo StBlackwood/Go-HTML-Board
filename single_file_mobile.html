@@ -1,0 +1,370 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" href="assets/gofav-icon.png" type="image/png"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+  <title>Go Board</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #f0e0b0;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      font-family: sans-serif;
+    }
+
+    #container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;            /* center horizontally */
+      justify-content: space-between; /* push first child top, last child bottom */
+      height: 70vh;                   /* container height */
+      padding: 1.5em 0;               /* more breathing room top & bottom */
+      row-gap: 1.5em;                 /* space between canvas and each control row */
+    }
+
+
+
+    canvas {
+      width: 95vmin;
+      height: 95vmin;
+      margin: 0.5em 0;                /* extra gap above and below the board */
+      background-color: #d6b55d;
+      border: 2px solid #333;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+
+
+    button {
+      padding: 1em 2em;
+      font-size: 1.2em;
+      border: none;
+      border-radius: 8px;
+      background: #444;
+      color: white;
+      cursor: pointer;
+    }
+
+    button.selected {
+      background-color: #007acc;
+      color: white;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #222;
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    /* make buttons & form fields tiny */
+    .controls button,
+    .controls input[type="text"],
+    .controls select {
+      padding: 0.5em 0.8em;
+      font-size: 1em;
+      border-radius: 6px;
+    }
+
+  </style>
+</head>
+<body>
+<div id="container">
+  <canvas id="goBoard"></canvas>
+  <div class="controls">
+    <button onclick="setMode('black')">Black</button>
+    <button onclick="setMode('white')">White</button>
+    <button onclick="setMode('alt')">Alt</button>
+    <button onclick="undoMove()">Undo</button>
+  </div>
+
+  <div class="controls">
+    <input type="text" id="saveName" placeholder="Enter name..." />
+    <button onclick="saveToStorage()">Save</button>
+    <select id="loadSelector"></select>
+    <button onclick="loadFromStorage()">Load</button>
+    <button onclick="deleteSaved()">Delete</button>
+    <input type="file" id="fileInput" style="display:none" />
+  </div>
+
+</div>
+
+<script>
+  const canvas = document.getElementById("goBoard");
+  const ctx = canvas.getContext("2d");
+
+  const boardSize = 19;
+  let stones = Array.from({length: boardSize}, () => Array(boardSize).fill(null));
+  let moveHistory = []; // stack of {x, y}
+
+  let mode;
+  setMode("alt");
+  let lastStone = "white";
+
+  let logicalSize = 0;
+  let cellSize = 0;
+
+  function saveToStorage() {
+    const name = document.getElementById('saveName').value.trim();
+    if (!name) {
+      alert("Enter a name to save the board.");
+      return;
+    }
+
+    const boardData = {
+      boardSize,
+      stones,
+      moveHistory
+    };
+
+    localStorage.setItem("go_board_" + name, JSON.stringify(boardData));
+    updateLoadSelector();
+    alert("Saved as: " + name);
+  }
+
+  function loadFromStorage() {
+    const select = document.getElementById('loadSelector');
+    const key = select.value;
+    if (!key) return;
+
+    const raw = localStorage.getItem(key);
+    if (!raw) return;
+
+    try {
+      const data = JSON.parse(raw);
+      stones = data.stones;
+      moveHistory = data.moveHistory;
+      drawBoard();
+      alert("Loaded: " + key.replace("go_board_", ""));
+    } catch (e) {
+      alert("Failed to load configuration");
+    }
+  }
+
+  function deleteSaved() {
+    const select = document.getElementById('loadSelector');
+    const key = select.value;
+    if (!key) return;
+
+    if (confirm("Delete saved config: " + key.replace("go_board_", "") + "?")) {
+      localStorage.removeItem(key);
+      updateLoadSelector();
+    }
+  }
+
+  function updateLoadSelector() {
+    const select = document.getElementById('loadSelector');
+    select.innerHTML = "";
+    Object.keys(localStorage).forEach(key => {
+      if (key.startsWith("go_board_")) {
+        const option = document.createElement("option");
+        option.value = key;
+        option.textContent = key.replace("go_board_", "");
+        select.appendChild(option);
+      }
+    });
+  }
+
+  // Call this on page load
+  updateLoadSelector();
+
+  function resizeCanvas() {
+    const cssSize = Math.min(window.innerWidth * 0.95, window.innerHeight * 0.8);
+    const dpr = window.devicePixelRatio || 1;
+
+    logicalSize = cssSize; // store CSS size for drawing/input
+    canvas.style.width = cssSize + "px";
+    canvas.style.height = cssSize + "px";
+
+    canvas.width = cssSize * dpr;
+    canvas.height = cssSize * dpr;
+
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    cellSize = logicalSize / (boardSize + 1);
+
+    drawBoard();
+  }
+
+  function saveBoard() {
+    const defaultName = "go-board-" + new Date().toISOString().slice(0, 19).replace(/:/g, "-") + ".json";
+    const filename = prompt("Enter filename to save", defaultName);
+    if (!filename) return;
+
+    const boardData = {
+      boardSize,
+      stones,
+      moveHistory
+    };
+
+    const blob = new Blob([JSON.stringify(boardData)], {type: "application/json"});
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  function loadBoard() {
+    document.getElementById("fileInput").click();
+  }
+
+  document.getElementById("fileInput").addEventListener("change", function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (!data.stones || !data.moveHistory) throw new Error("Invalid file");
+
+        // Validate and apply
+        if (data.boardSize !== boardSize) {
+          alert("Board size mismatch");
+          return;
+        }
+
+        stones = data.stones;
+        moveHistory = data.moveHistory;
+        drawBoard();
+      } catch (err) {
+        alert("Error loading board: " + err.message);
+      }
+    };
+    reader.readAsText(file);
+  });
+
+
+  function drawBoard() {
+    ctx.clearRect(0, 0, logicalSize, logicalSize);
+
+    ctx.strokeStyle = "#000";
+    for (let i = 1; i <= boardSize; i++) {
+      // Vertical
+      ctx.beginPath();
+      ctx.moveTo(i * cellSize, cellSize);
+      ctx.lineTo(i * cellSize, boardSize * cellSize);
+      ctx.stroke();
+
+      // Horizontal
+      ctx.beginPath();
+      ctx.moveTo(cellSize, i * cellSize);
+      ctx.lineTo(boardSize * cellSize, i * cellSize);
+      ctx.stroke();
+    }
+
+    function drawStars() {
+      const hoshi = boardSize === 19
+              ? [3, 9, 15]
+              : [Math.floor(boardSize / 2)];
+
+      ctx.fillStyle = "#000";
+      for (let i of hoshi) {
+        for (let j of hoshi) {
+          ctx.beginPath();
+          ctx.arc((i + 1) * cellSize, (j + 1) * cellSize, cellSize / 8, 0, 2 * Math.PI);
+          ctx.fill();
+        }
+      }
+    }
+
+    drawStars();
+
+
+    let moveNumber = 0;
+    for (let i = 0; i < moveHistory.length; i++) {
+      const {x, y, mode} = moveHistory[i];
+      const color = stones[y][x];
+      drawStone(x, y, color);
+      if (mode === "alt") {
+        moveNumber++;
+        drawMoveNumber(x, y, moveNumber, color);
+      }
+    }
+  }
+
+  function drawMoveNumber(x, y, number, color) {
+    const cx = (x + 1) * cellSize;
+    const cy = (y + 1) * cellSize;
+    ctx.fillStyle = color === "black" ? "#fff" : "#000";
+    ctx.font = `${cellSize*0.5}px sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(number, cx, cy);
+  }
+
+  function drawStone(x, y, color) {
+    const cx = (x + 1) * cellSize;
+    const cy = (y + 1) * cellSize;
+    const r = cellSize / 2.3;
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+    ctx.fillStyle = color === "black" ? "#000" : "#fff";
+    ctx.strokeStyle = "#333";
+    ctx.fill();
+    ctx.stroke();
+  }
+
+
+  function setMode(newMode) {
+    mode = newMode;
+
+    document.querySelectorAll('.controls button').forEach(btn => {
+      btn.classList.remove('selected');
+    });
+
+    const buttonMap = {
+      black: 'Black',
+      white: 'White',
+      alt: 'Alt'
+    };
+
+    const selectedLabel = buttonMap[newMode];
+    document.querySelectorAll('.controls button').forEach(btn => {
+      if (btn.textContent.trim() === selectedLabel) {
+        btn.classList.add('selected');
+      }
+    });
+  }
+
+  function undoMove() {
+    const last = moveHistory.pop();
+    if (!last) return;
+    stones[last.y][last.x] = null;
+    drawBoard();
+  }
+
+
+  canvas.addEventListener("click", (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = Math.round((e.clientX - rect.left) / cellSize - 1);
+    const y = Math.round((e.clientY - rect.top) / cellSize - 1);
+
+    if (x < 0 || x >= boardSize || y < 0 || y >= boardSize) return;
+    if (stones[y][x]) return;
+
+    let colorToPlace = mode === "alt"
+            ? (lastStone === "black" ? "white" : "black")
+            : mode;
+
+    stones[y][x] = colorToPlace;
+    moveHistory.push({x, y, mode});
+    lastStone = colorToPlace;
+    drawBoard();
+  });
+
+
+  window.addEventListener("resize", resizeCanvas);
+  resizeCanvas();
+</script>
+</body>
+</html>
