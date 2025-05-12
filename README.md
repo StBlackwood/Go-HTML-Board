@@ -1,81 +1,77 @@
-﻿Go Board
+﻿# Go Board
 
-A simple, modular browser-based Go board implementation using HTML5 Canvas, ES modules, and LocalStorage.
+A lightweight, responsive Go board for modern browsers. Built with plain HTML, CSS and JavaScript (ES modules), it supports:
 
-Features
+- **19×19 grid** with crisp, high-DPI rendering  
+- **Black / White / Alt** placement modes  
+- **Undo** last move  
+- **Move numbering** overlay  
+- **9-star hoshi points** for orientation  
+- **Save & Load** configurations via `localStorage` or JSON import/export  
 
-Responsive, full-screen Go board (19×19) with high-DPI support
+---
 
-Black, White, and Alt modes for stone placement
+## 🚀 Getting Started
 
-9-star hoshi points for easy orientation
+1. **Clone or download** this repository.  
+2. Choose your entry point:
+    - **Desktop browsers**: open [`index.html`](index.html)  
+      (modular ES-modules, best served via HTTP or local web server)
+    - **Mobile & tablet browsers**: open [`single_file_mobile.html`](single_file_mobile.html)  
+      (all-in-one, no module imports—works over `file://`)
+---
 
-Move numbering ledger on stones
+## ⚙️ Usage
 
-Undo last move
+1. **Mode Selection**  
+   - **Black** — place a black stone  
+   - **White** — place a white stone  
+   - **Alt** — alternate automatically  
+2. **Click** on board intersections to place stones.  
+3. **Undo** removes the most recent stone.  
+4. **Save** — enter a name to store the current board in browser storage.  
+5. **Load** — pick a saved configuration to restore.  
+6. **Delete** — remove a named configuration.  
+7. **Export/Import** — use the hidden file picker to download or load a JSON file of the board state.
 
-Save/load board configurations to LocalStorage
+---
 
-Import/export JSON board state files
+## 🛠️ Development
 
-Modular code structure (HTML, CSS, JS modules)
+- **Drawing & Canvas**: `js/board.js`  
+- **UI Logic & Events**: `js/ui.js`  
+- **Persistence**: `js/storage.js`  
+- **Initialization**: `js/main.js`  
+- **Styles**: `css/styles.css`
 
-Project Structure
+**Customization Tips**  
+- Change the `boardSize` constant in `js/board.js` for different dimensions (e.g., 13×13).  
+- Implement SGF export in `js/storage.js`.  
+- Add pinch-zoom or drag gestures in `js/ui.js`.  
 
-go-board/
-├── index.html           # Minimal HTML linking CSS & JS modules
-├── css/
-│   └── styles.css       # All visual styling rules
-├── js/
-│   ├── board.js         # Canvas setup & drawing logic
-│   ├── ui.js            # Mode control, undo, click handling
-│   ├── storage.js       # LocalStorage & file import/export
-│   └── main.js          # App initialization & event binding
-└── assets/
-└── gofav-icon.png   # Favicon asset
+---
 
-Getting Started
+## 🤝 Contributing
 
-Clone or download this repository:
+1. Fork the repository.  
+2. Create a feature branch:
+   ```
+   git checkout -b feature/your-feature
 
-git clone https://github.com/yourusername/go-board.git
-cd go-board
+3. Commit your changes:
 
-Serve the files with any static web server. For example, using http-server:
+   ```bash
+   git commit -m "Add awesome feature"
+   ```
+4. Push and open a Pull Request.
 
-npm install -g http-server
-http-server .
+*Please keep code modular and well-documented.*
 
-Open your browser and navigate to http://localhost:8080 (or the port shown).
+---
 
-Play with the board:
+## 📄 License
 
-Click Black, White, or Alt to choose placement mode
+This project is licensed under the MIT License. See [Licence.md](Licence.md) for details.
 
-Click intersections to place stones
-
-Use Undo to remove the last move
-
-Save and Load board states via LocalStorage
-
-Export to a JSON file or Import one via the hidden file input
-
-Customization
-
-Change boardSize in js/board.js to support different dimensions (e.g., 13×13)
-
-Modify CSS in css/styles.css for color, spacing, or layout tweaks
-
-Extend storage.js to integrate cloud or server-side persistence
-
-Contributing
-
-Fork the repository
-
-Create a feature branch (git checkout -b feature/YourFeature)
-
-Commit your changes (git commit -am 'Add feature')
-
-Push to the branch (git push origin feature/YourFeature)
-
-Open a Pull Request
+```
+```
