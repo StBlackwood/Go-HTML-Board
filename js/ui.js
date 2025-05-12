@@ -1,5 +1,5 @@
 ﻿// js/ui.js
-import { boardConfig, drawGrid, drawStars, drawAllStones } from './board.js';
+import {boardConfig, drawGrid, drawStars, drawAllStones} from './board.js';
 
 // Highlight and set the current mode
 export function setMode(newMode) {
@@ -25,6 +25,20 @@ export function bindCanvasClick(canvasElem) {
         const x = Math.round((e.clientX - rect.left) / boardConfig.cellSize - 1);
         const y = Math.round((e.clientY - rect.top) / boardConfig.cellSize - 1);
         if (x < 0 || x >= boardConfig.boardSize || y < 0 || y >= boardConfig.boardSize) return;
+
+        if (boardConfig.mode === 'remove') {
+            if (!boardConfig.stones[y][x]) return;
+            boardConfig.stones[y][x] = null;
+            boardConfig.moveHistory.push({
+                x,
+                y,
+                mode: boardConfig.mode,
+                action: 'remove'
+            });
+            redrawBoard();
+            return;
+        }
+
         if (boardConfig.stones[y][x]) return;
 
         const color = (boardConfig.mode === 'alt')
@@ -32,7 +46,13 @@ export function bindCanvasClick(canvasElem) {
             : boardConfig.mode;
 
         boardConfig.stones[y][x] = color;
-        boardConfig.moveHistory.push({ x, y, mode: boardConfig.mode });
+        boardConfig.moveHistory.push({
+            x,
+            y,
+            mode: boardConfig.mode,
+            color,
+            action: boardConfig.mode === "remove" ? "remove" : "place"
+        });
         boardConfig.lastStone = color;
         redrawBoard();
     });

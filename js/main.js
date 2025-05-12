@@ -1,7 +1,7 @@
 ﻿// js/main.js
-import { initCanvas, resizeCanvas } from './board.js';
-import { setMode, undoMove, bindCanvasClick } from './ui.js';
-import { populateSelector, saveToLocal, loadFromLocal, deleteLocal, setupFileImport } from './storage.js';
+import {initCanvas, resizeCanvas} from './board.js';
+import {setMode, undoMove, bindCanvasClick} from './ui.js';
+import {populateSelector, saveToLocal, loadFromLocal, deleteLocal, setupFileImport} from './storage.js';
 
 window.addEventListener('DOMContentLoaded', () => {
     // Canvas init

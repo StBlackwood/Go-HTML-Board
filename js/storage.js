@@ -1,6 +1,6 @@
 ﻿// js/storage.js
-import { boardConfig } from './board.js';
-import { redrawBoard } from './ui.js';
+import {boardConfig} from './board.js';
+import {redrawBoard} from './ui.js';
 
 const PREFIX = 'go_board_';
 
