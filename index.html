@@ -1,0 +1,31 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Go Board</title>
+    <link rel="icon" href="assets/gofav-icon.png" type="image/png" />
+    <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+<div id="container">
+    <canvas id="goBoard"></canvas>
+    <div class="controls mode-controls">
+        <button data-mode="black">Black</button>
+        <button data-mode="white">White</button>
+        <button data-mode="alt">Alt</button>
+        <button id="undoBtn">Undo</button>
+    </div>
+    <div class="controls save-load-controls">
+        <input type="text" id="saveName" placeholder="Enter name…" />
+        <button id="saveBtn">Save</button>
+        <select id="loadSelector"></select>
+        <button id="loadBtn">Load</button>
+        <button id="deleteBtn">Delete</button>
+        <input type="file" id="fileInput" hidden />
+    </div>
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
