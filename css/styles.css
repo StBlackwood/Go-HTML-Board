@@ -14,15 +14,15 @@
     align-items: center; /* center horizontally */
     justify-content: space-between; /* push first child top, last child bottom */
     height: 70vh; /* container height */
-    padding: 1.5em 0; /* more breathing room top & bottom */
+    padding: 0.4em 0; /* more breathing room top & bottom */
     row-gap: 1.5em; /* space between canvas and each control row */
 }
 
 
 canvas {
-    width: 95vmin;
-    height: 95vmin;
-    margin: 0.5em 0; /* extra gap above and below the board */
+    width: 98vmin;
+    height: 98vmin;
+    margin: 0.2em 0; /* extra gap above and below the board */
     background-color: #d6b55d;
     border: 2px solid #333;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
