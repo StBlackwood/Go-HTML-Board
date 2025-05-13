@@ -309,6 +309,17 @@
             }
         }
         stones = newStones;
+
+        function findLastStone() {
+            for (let i = moveHistory.length - 1; i >= 0; i--) {
+                const {action, mode} = moveHistory[i];
+                if (action === "place" && mode === "alt") {
+                    return moveHistory[i].color;
+                }
+            }
+            return "white";
+        }
+        lastStone = findLastStone();
     }
 
     function drawMoveNumber(x, y, number, color) {
@@ -387,7 +398,6 @@
 
         stones[y][x] = colorToPlace;
         moveHistory.push({x, y, mode, color: colorToPlace, action: mode === "remove" ? "remove" : "place"});
-        lastStone = colorToPlace;
         drawBoard();
     });
 

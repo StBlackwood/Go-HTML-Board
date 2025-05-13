@@ -34,6 +34,17 @@ export function resizeCanvas() {
     drawGrid();
     drawStars();
     drawAllStones();
+    boardConfig.lastStone = findLastStone();
+}
+
+export function findLastStone() {
+    for (let i = boardConfig.moveHistory.length - 1; i >= 0; i--) {
+        const {action, mode} = boardConfig.moveHistory[i];
+        if (action === "place" && mode === "alt") {
+            return boardConfig.moveHistory[i].color;
+        }
+    }
+    return "white";
 }
 
 // Draw the grid lines

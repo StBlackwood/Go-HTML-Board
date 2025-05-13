@@ -1,5 +1,5 @@
 ﻿// js/ui.js
-import {boardConfig, drawGrid, drawStars, drawAllStones} from './board.js';
+import {boardConfig, drawGrid, drawStars, drawAllStones, findLastStone} from './board.js';
 
 // Highlight and set the current mode
 export function setMode(newMode) {
@@ -63,4 +63,5 @@ export function redrawBoard() {
     drawGrid();
     drawStars();
     drawAllStones();
+    boardConfig.lastStone = findLastStone();
 }
